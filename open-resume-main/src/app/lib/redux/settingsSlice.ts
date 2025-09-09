@@ -27,11 +27,12 @@ export interface Settings {
     skills: boolean;
     custom: boolean;
   };
-  template: "A" | "B" | "C" | "D"; // ✅ Updated to include Template D
+  template: "A" | "B" | "C" | "D" | "LaTeX"; // ✅ Updated to include LaTeX template
 }
 
 export type ShowForm = keyof Settings["formToShow"];
 export type FormWithBulletPoints = keyof Settings["showBulletPoints"];
+export type Template = Settings["template"]; // ✅ Export Template type
 export type GeneralSetting = Exclude<
   keyof Settings,
   | "formToShow"
@@ -130,7 +131,7 @@ export const settingsSlice = createSlice({
     setSettings: (draft, action: PayloadAction<Settings>) => {
       return action.payload;
     },
-    setTemplate: (draft, action: PayloadAction<"A" | "B" | "C" | "D">) => { // ✅ Updated to include "D"
+    setTemplate: (draft, action: PayloadAction<Template>) => { // ✅ Updated to include LaTeX
       draft.template = action.payload;
     },
   },
@@ -169,5 +170,16 @@ export const selectShowBulletPoints =
     state.settings.showBulletPoints[form];
 
 export const selectTemplate = (state: RootState) => state.settings.template; // ✅ selector
+
+// ✅ Helper functions for template validation
+export const VALID_TEMPLATES: Template[] = ["A", "B", "C", "D", "LaTeX"];
+
+export const isValidTemplate = (template: string): template is Template => {
+  return VALID_TEMPLATES.includes(template as Template);
+};
+
+export const isLaTeXTemplate = (template: Template): boolean => {
+  return template === "LaTeX";
+};
 
 export default settingsSlice.reducer;

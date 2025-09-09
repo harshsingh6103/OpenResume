@@ -1,4 +1,3 @@
-// Template A - Modern Professional Design with Download
 import { Page, View, Document, Font, pdf } from "@react-pdf/renderer";
 import { styles, spacing } from "components/Resume/ResumePDF/styles";
 import { useState } from "react";
@@ -6,7 +5,6 @@ import { useState } from "react";
 // Register fonts with fallbacks
 const registerFonts = async () => {
   try {
-    // Try loading from CDN
     await Font.register({
       family: 'Source Sans Pro',
       src: 'https://cdn.jsdelivr.net/npm/source-sans-pro@3.6.0/TTF/SourceSansPro-Regular.ttf',
@@ -19,7 +17,7 @@ const registerFonts = async () => {
       fontWeight: 'bold'
     });
   } catch (error) {
-    console.warn('CDN font loading failed, using system fonts:', error);
+    console.warn('Font loading failed:', error);
     // Fallback to system fonts
     Font.register({
       family: 'Source Sans Pro',
@@ -30,9 +28,6 @@ const registerFonts = async () => {
     });
   }
 };
-
-// Initialize fonts
-registerFonts();
 import { ResumePDFProfile } from "components/Resume/ResumePDF/ResumePDFProfile";
 import { ResumePDFWorkExperience } from "components/Resume/ResumePDF/ResumePDFWorkExperience";
 import { ResumePDFEducation } from "components/Resume/ResumePDF/ResumePDFEducation";
@@ -40,11 +35,11 @@ import { ResumePDFProject } from "components/Resume/ResumePDF/ResumePDFProject";
 import { ResumePDFSkills } from "components/Resume/ResumePDF/ResumePDFSkills";
 import { ResumePDFCustom } from "components/Resume/ResumePDF/ResumePDFCustom";
 import { DEFAULT_FONT_COLOR } from "lib/redux/settingsSlice";
-import type { Settings, ShowForm } from "lib/redux/settingsSlice";
+import type { Settings } from "lib/redux/settingsSlice";
 import type { Resume } from "lib/redux/types";
 import { SuppressResumePDFErrorMessage } from "components/Resume/ResumePDF/common/SuppressResumePDFErrorMessage";
 
-export const ResumePDFTemplateA = ({
+export const ResumePDFTemplateC = ({
   resume,
   settings,
   isPDF = false,
@@ -56,201 +51,140 @@ export const ResumePDFTemplateA = ({
   const { profile, workExperiences, educations, projects, skills, custom } = resume;
   const { name } = profile;
   const {
+    fontFamily,
     fontSize,
     documentSize,
     formToHeading,
-    formToShow,
-    formsOrder,
     showBulletPoints,
   } = settings;
-  const themeColor = settings.themeColor || "#1f2937"; // Dark gray for professional look
-
-  const showFormsOrder = formsOrder.filter((form) => formToShow[form]);
-
-  const formTypeToComponent: { [type in ShowForm]: () => JSX.Element } = {
-    workExperiences: () => (
-      <ResumePDFWorkExperience
-        heading={formToHeading["workExperiences"]}
-        workExperiences={workExperiences}
-        themeColor={themeColor}
-      />
-    ),
-    educations: () => (
-      <ResumePDFEducation
-        heading={formToHeading["educations"]}
-        educations={educations}
-        themeColor={themeColor}
-        showBulletPoints={showBulletPoints["educations"]}
-      />
-    ),
-    projects: () => (
-      <ResumePDFProject
-        heading={formToHeading["projects"]}
-        projects={projects}
-        themeColor={themeColor}
-      />
-    ),
-    skills: () => (
-      <ResumePDFSkills
-        heading={formToHeading["skills"]}
-        skills={skills}
-        themeColor={themeColor}
-        showBulletPoints={showBulletPoints["skills"]}
-      />
-    ),
-    custom: () => (
-      <ResumePDFCustom
-        heading={formToHeading["custom"]}
-        custom={custom}
-        themeColor={themeColor}
-        showBulletPoints={showBulletPoints["custom"]}
-      />
-    ),
-  };
-
+  const themeColor = settings.themeColor || "#0f766e"; // Modern teal theme
   const [isDownloading, setIsDownloading] = useState(false);
 
   // PDF Document Component
   const PDFDocument = () => (
-    <Document title={`${name} Resume`} author={name} producer="OpenResume">
-      <Page
+    <>
+      <Document title={`${name} Resume`} author={name}>
+        <Page
           size={documentSize === "A4" ? "A4" : "LETTER"}
           style={{
-            ...styles.flexCol,
-            color: "#2d3748", // Softer dark color for text
-            fontFamily: "Source Sans Pro", // Using our registered font
-            fontSize: "10pt", // Slightly smaller for more content
-            lineHeight: 1.4,
-            backgroundColor: "#ffffff",
+            flexDirection: "column",
+            backgroundColor: "#fff",
+            color: "#1a1a1a",
+            fontFamily: "Source Sans Pro",
+            fontSize: fontSize + "pt",
+            padding: spacing[6],
           }}
         >
-          {/* Modern Header with Gradient Effect */}
+          {/* ===== Top Profile Section with Modern Layout ===== */}
           <View
             style={{
-              backgroundColor: themeColor,
-              width: "100%",
-              height: spacing[4],
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              borderLeft: `4pt solid ${themeColor}`,
+              paddingLeft: spacing[4],
               marginBottom: spacing[6],
-            }}
-          />
-          
-          {/* Main Content Container */}
-          <View
-            style={{
-              ...styles.flexCol,
-              padding: `${spacing[0]} ${spacing[16]}`, // More generous padding
-              gap: spacing[5], // Better section spacing
+              borderBottom: `2pt solid ${themeColor}`,
             }}
           >
-            {/* Profile Section with Enhanced Styling */}
-            <View
-              style={{
-                borderLeft: `4pt solid ${themeColor}`,
-                paddingLeft: spacing[4],
-                marginBottom: spacing[4],
-                backgroundColor: "#f8fafc",
-                padding: spacing[4],
-                borderRadius: "4pt",
-              }}
-            >
-              <ResumePDFProfile
-                profile={profile}
+            <ResumePDFProfile profile={profile} themeColor={themeColor} isPDF={isPDF} />
+          </View>
+
+          {/* ===== Two Column Layout ===== */}
+          <View
+            style={{
+              flexDirection: "row",
+              gap: spacing[8],
+              border: `2pt solid ${themeColor}`,
+              borderRadius: 8,
+              overflow: "hidden",
+            }}
+          >
+            {/* ---- Main Content (Left, 70%) ---- */}
+            <View style={{ width: "70%", paddingRight: spacing[6] }}>
+              <ResumePDFWorkExperience
+                heading={formToHeading["workExperiences"]}
+                workExperiences={workExperiences}
                 themeColor={themeColor}
-                isPDF={isPDF}
+              />
+              <ResumePDFEducation
+                heading={formToHeading["educations"]}
+                educations={educations}
+                themeColor={themeColor}
+                showBulletPoints={showBulletPoints["educations"]}
+              />
+              <ResumePDFProject
+                heading={formToHeading["projects"]}
+                projects={projects}
+                themeColor={themeColor}
               />
             </View>
 
-            {/* Content Sections with Better Spacing */}
-            {showFormsOrder.map((form, index) => {
-              const Component = formTypeToComponent[form];
-              return (
-                <View
-                  key={form}
-                  style={{
-                    marginBottom: index === showFormsOrder.length - 1 ? 0 : spacing[4],
-                    borderBottom: index === showFormsOrder.length - 1 ? "none" : `1pt solid ${themeColor}20`,
-                    paddingBottom: index === showFormsOrder.length - 1 ? 0 : spacing[3],
-                  }}
-                >
-                  <Component />
-                </View>
-              );
-            })}
+            {/* ---- Sidebar (Right, 30%) ---- */}
+            <View style={{ width: "30%", paddingLeft: spacing[6], backgroundColor: "#f8fafc", minHeight: 400, borderLeft: `2pt solid ${themeColor}` }}>
+              <ResumePDFSkills
+                heading={formToHeading["skills"]}
+                skills={skills}
+                themeColor={themeColor}
+                showBulletPoints={showBulletPoints["skills"]}
+              />
+              <ResumePDFCustom
+                heading={formToHeading["custom"]}
+                custom={custom}
+                themeColor={themeColor}
+                showBulletPoints={showBulletPoints["custom"]}
+              />
+            </View>
           </View>
-          
-          {/* Footer with Subtle Accent */}
-          <View
-            style={{
-              position: "absolute",
-              bottom: spacing[4],
-              left: spacing[16],
-              right: spacing[16],
-              height: "2pt",
-              backgroundColor: `${themeColor}40`,
-            }}
-          />
         </Page>
       </Document>
+      <SuppressResumePDFErrorMessage />
+    </>
   );
 
-  // Download function with enhanced error handling and retry logic
+  // Download function with enhanced error handling
   const downloadPDF = async () => {
     if (isDownloading) return;
 
     try {
       setIsDownloading(true);
-      
-      // Ensure fonts are loaded first
-      try {
-        await registerFonts();
-      } catch (fontError) {
-        console.warn('Font loading warning:', fontError);
-        // Continue with system fonts
-      }
-
-      // Ensure fonts are loaded before PDF creation
+      await registerFonts();
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Create new PDF instance with timeout
+
       const doc = pdf();
       let pdfGenerated = false;
       
-      // Set a timeout for the entire process
+      // Set timeout
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('PDF generation timed out')), 15000);
       });
       
-      // Retry logic with progressive delays
       const generatePDF = async () => {
         let retryCount = 0;
         const maxRetries = 3;
-        const delays = [1000, 2000, 3000]; // Progressive delays
+        const delays = [1000, 2000, 3000];
         
         while (retryCount < maxRetries) {
           try {
             console.log(`PDF generation attempt ${retryCount + 1}/${maxRetries}`);
             doc.updateContainer(<PDFDocument />);
-            
-            // Wait for fonts and rendering
             await new Promise(resolve => setTimeout(resolve, delays[retryCount]));
             
             const blob = await doc.toBlob();
             if (!blob) throw new Error('PDF blob generation failed');
             
-            // Create and trigger download
             const url = window.URL.createObjectURL(blob);
             const link = window.document.createElement('a');
             link.href = url;
-            link.download = `${name?.trim() ? name.replace(/[^a-zA-Z0-9]/g, '_') : 'resume'}-template-A.pdf`;
+            link.download = `${name?.trim() ? name.replace(/[^a-zA-Z0-9]/g, '_') : 'resume'}-template-C.pdf`;
             
             window.document.body.appendChild(link);
             link.click();
             window.document.body.removeChild(link);
             
-            // Cleanup
             setTimeout(() => window.URL.revokeObjectURL(url), 1000);
             pdfGenerated = true;
-            console.log("PDF generated successfully");
             return;
           } catch (error) {
             console.warn(`Attempt ${retryCount + 1} failed:`, error);
@@ -260,7 +194,6 @@ export const ResumePDFTemplateA = ({
         }
       };
 
-      // Race between timeout and PDF generation
       await Promise.race([generatePDF(), timeoutPromise]);
       
       if (!pdfGenerated) {
@@ -287,7 +220,6 @@ export const ResumePDFTemplateA = ({
     }
   };
 
-  // If this is being rendered in PDF mode, return the document
   if (isPDF) {
     return (
       <>
@@ -297,7 +229,6 @@ export const ResumePDFTemplateA = ({
     );
   }
 
-  // For preview mode, show with download button
   return (
     <>
       {/* Fixed Download Button */}
@@ -311,7 +242,7 @@ export const ResumePDFTemplateA = ({
           onClick={downloadPDF}
           disabled={isDownloading}
           style={{
-            backgroundColor: isDownloading ? '#9ca3af' : (themeColor || '#1f2937'),
+            backgroundColor: isDownloading ? '#9ca3af' : (themeColor || '#0f766e'),
             color: 'white',
             border: 'none',
             padding: '12px 24px',
@@ -335,8 +266,3 @@ export const ResumePDFTemplateA = ({
     </>
   );
 };
-
-
-
-
-
